@@ -50,6 +50,8 @@ def execute(sql,args):#是insert update delete的通用执行函数
             yield from cur.close()
         except BaseException as e:
             raise
+        finally:
+            yield from conn.close()#释放数据库连接
         return affected
 class Field(object):
     def __init__(self,name,column_type,primary_key,default):
