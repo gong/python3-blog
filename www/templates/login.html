@@ -1,0 +1,82 @@
+
+{% extends '__base__.html' %}
+
+{% block title %}登录{% endblock %}
+
+
+
+{% block beforehead %}
+    <style type="text/css">
+    .bd{margin: auto;
+    position: relative;
+    background: rgba(238, 238, 238, 0.51);
+    height: 662px;
+    width: 955px;
+    }
+    .login{
+    top:200px;
+    width: 200px;
+    height: 50px;
+    font-size: large;
+    position: relative;
+    margin: 0 auto;
+    }
+
+    .form{
+     top:200px;
+    margin: 0 auto;
+    background-color: rgba(158, 158, 158, 0.27);
+    position: relative;
+    width: 197px;
+    height: 116px;
+    }
+    .form input.un{
+    margin-top:10px;
+    width:180px;
+    margin-left:8px}
+
+    .form input.pw{
+    margin-top:10px;
+    width:180px;
+    margin-left:8px}
+
+    .form input.sb{
+    width:50px;
+    float: right;
+    margin-right: 20px;
+    margin-top:15px}
+
+    </style>
+  {% endblock %}
+
+{% block content %}
+
+<div class="bd">
+
+{% if message %}
+  <p style="color:red;text-align:center">{{ message }}</p>
+  {% endif %}
+<div class="login">
+    <p style="text-align:center">登录</p>
+</div>
+<div class="form">
+    <form action="/signin" method="post">
+    <input class="un" name="username" placeholder="Username" value='{{ username }}'/>
+    <input class="pw" name="password" placeholder="Password" type="password"/>
+        <input class="sb" placeholder="登录" type="submit"/>
+    </form>
+</div>
+    <div class="uk-width-medium-1-4">
+        <div class="uk-panel uk-panel-header">
+            <h3 class="uk-panel-title">友情链接</h3>
+            <ul class="uk-list uk-list-line">
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">编程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">读书</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Python教程</a></li>
+                <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Git教程</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

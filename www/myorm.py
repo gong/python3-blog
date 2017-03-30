@@ -2,11 +2,12 @@ import asyncio
 import logging
 import aiomysql,sys
 logging.basicConfig(level=logging.INFO)
+
 @asyncio.coroutine
 def create_pool(loop,**kw):#封装了aiomysql.create_pool函数
     logging.info('create database connect pool...')
-    global __pool
-    __pool=yield from aiomysql.create_pool(
+    global __pools
+    __pools=yield from aiomysql.create_pool(
         host=kw.get('host','localhost'),
         port=kw.get('port',3306),
         user=kw['user'],
@@ -18,18 +19,20 @@ def create_pool(loop,**kw):#封装了aiomysql.create_pool函数
         minsize=kw.get('minsize',1),
         loop=loop # 接收一个event_loop实例
     )
+    logging.info("----------"if __pools is not None else "++++++++++++")
 @asyncio.coroutine
 def destroy_pool():
-    global __pool
-    if __pool is not None :
-        __pool.close()  #关闭进程池,The method is not a coroutine,就是说close()不是一个协程，所以不用yield from
-        yield from __pool.wait_closed() #但是wait_close()是一个协程，所以要用yield from,到底哪些函数是协程，上面Pool的链接中都有
+    global __pools
+    if __pools is not None :
+        __pools.close()  #关闭进程池,The method is not a coroutine,就是说close()不是一个协程，所以不用yield from
+        yield from __pools.wait_closed() #但是wait_close()是一个协程，所以要用yield from,到底哪些函数是协程，上面Pool的链接中都有
 @asyncio.coroutine
 def select(sql,args,size=None):
     logging.info('sql:%s'%sql)
     logging.info('args:%s'%args)
-    global __pool
-    with (yield from __pool) as conn:
+    global __pools
+    logging.info("----------" if __pools is not None else "++++++++++++")
+    with (yield from __pools) as conn:
         cur=yield from conn.cursor(aiomysql.DictCursor)
         yield from cur.execute(sql.replace('?','%s'),args or ())
         if size:
@@ -42,7 +45,7 @@ def select(sql,args,size=None):
 @asyncio.coroutine
 def execute(sql,args):#是insert update delete的通用执行函数
     logging.info('sql:%s'%sql)
-    with(yield from __pool) as conn:
+    with(yield from __pools) as conn:
         try:
             cur=yield from conn.cursor()
             yield from cur.execute(sql.replace('?','%s'),args)
