@@ -53,8 +53,8 @@ def execute(sql,args):#是insert update delete的通用执行函数
             yield from cur.close()
         except BaseException as e:
             raise
-        finally:
-            yield from conn.close()#释放数据库连接
+        # finally:
+        #     yield from conn.close()#释放数据库连接 会报错
         return affected
 class Field(object):
     def __init__(self,name,column_type,primary_key,default):
@@ -144,7 +144,7 @@ class ModelMetaclass(type):
         attrs['__primary_key__']=primaryKey#主键属性名
         attrs['__fields__']=fields#除主键外的属性名
         # 构造默认的SELECT INSERT UPDATE DELETE 语句
-        attrs['__select__']='select %s %s from %s'%(primaryKey,','.join(escaped_fields),tableName)
+        attrs['__select__']='select %s,%s from %s'%(primaryKey,','.join(escaped_fields),tableName)
         attrs['__insert__']='insert into %s (%s,%s)value(%s)'%(tableName,','.join(escaped_fields),primaryKey,create_args_string(len(escaped_fields)+1))#create_args_string这个默认字符构造函数没有实现
         attrs['__update__']='update %s set %s where %s=?'%(tableName,','.join(map(lambda f:'%s=?'%(mappings.get(f).name or f),fields)),primaryKey)
         attrs['__delete__']='delete from %s where %s=?'%(tableName,primaryKey)

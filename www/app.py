@@ -7,6 +7,7 @@ from webutils import add_routes,add_static
 from jinja2 import Environment, FileSystemLoader
 import myorm
 from config import configs
+from  handlers import cookie2user,COOKIE_NAME
 def init_jinja2(app, **kw):
     logging.info('init jinja2...')
     options = dict(
@@ -38,11 +39,11 @@ def logger_factory(app, handler):
         return (yield from handler(request))
     return logger
 @asyncio.coroutine
-def response_factory(app, handler):#将handler返回的值包装为一个web.Response对象
+def response_factory(app, handler):
     @asyncio.coroutine
     def response(request):
         # 结果:
-        r = yield from handler(request)
+        r = yield from handler(request)#将handler返回的值包装为一个web.Response对象
         if isinstance(r, web.StreamResponse):
             return r
         if isinstance(r, bytes):
@@ -56,6 +57,7 @@ def response_factory(app, handler):#将handler返回的值包装为一个web.Res
         if isinstance(r, dict):
             template = r.get('__template__')
             if template is None:
+                logging.info('******',r.__dict__)
                 resp = web.Response(#通常class的实例都有一个__dict__属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了__slots__的class
                     body=json.dumps(r, ensure_ascii=False, default=lambda o: o.__dict__).encode('utf-8'))
                 resp.content_type = 'application/json;charset=utf-8'
@@ -77,6 +79,23 @@ def response_factory(app, handler):#将handler返回的值包装为一个web.Res
 
     return response
 
+
+
+@asyncio.coroutine
+def auth_factory(app, handler):
+    @asyncio.coroutine
+    def auth(request):
+        logging.info('check user: %s %s' % (request.method, request.path))
+        request.__user__ = None
+        cookie_str = request.cookies.get(COOKIE_NAME)
+        if cookie_str:
+            user = yield from cookie2user(cookie_str)
+            if user:
+                logging.info('set current user: %s' % user.email)
+                request.__user__ = user
+        return (yield from handler(request))
+    return auth
+
 @asyncio.coroutine
 def data_factory(app, handler):
     @asyncio.coroutine
@@ -93,7 +112,7 @@ def data_factory(app, handler):
 
 def datetime_filter(t):
     delta = int(time.time() - t)
-    logging.info("时间：",delta)
+    logging.info("时间：%d"%delta)
     if delta < 60:
         return u'1分钟前'
     if delta < 3600:
@@ -108,7 +127,7 @@ def datetime_filter(t):
 def init(loop):
     yield from myorm.create_pool(loop=loop,db=configs.db.database,host=configs.db.host,user=configs.db.user,password=configs.db.password,port=configs.db.port)
     app=web.Application(loop=loop, middlewares=[
-    logger_factory, response_factory])
+    logger_factory,data_factory ,auth_factory,response_factory,])
     #app.router.add_route('GET','/',index)#最原始的添加路由的方法
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     add_routes(app,"handlers")
