@@ -28,7 +28,7 @@
     background-color: rgba(158, 158, 158, 0.27);
     position: relative;
     width: 197px;
-    height: 116px;
+    height: 170px;
     }
     .form input.un{
     margin-top:10px;
@@ -44,26 +44,65 @@
     width:50px;
     float: right;
     margin-right: 20px;
-    margin-top:15px}
+    margin-top:15px;
+    background-color: #009dd8;
+    color: white;
+    }
 
     </style>
+<script>
+function validateEmail(email) {
+    var re = /^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$/;
+    return re.test(email.toLowerCase());
+}
+$(function () {
+    var vm = new Vue({//数据和定义的viewModel实例绑定
+        el: '#vm',
+        data: {
+            email: '',
+            password: ''
+        },
+        methods: {
+            submit: function (event) {
+                event.preventDefault(); //阻止表单提交
+                var $form = $('#vm');
+                if (! validateEmail(this.email.trim().toLowerCase())) {
+                    return $form.showFormError('请输入正确的Email地址');
+                }
+                if (this.password.length < 6) {
+                    return $form.showFormError('口令长度至少为6个字符');
+                }
+                var email = this.email.trim().toLowerCase();
+                $form.postJSON('/api/authenticate', {
+                    email: email,
+                    passwd: CryptoJS.SHA1(email + ':' + this.password).toString()
+                }, function (err, r) {
+                    if (err) {
+                        return $form.showFormError(err);
+                    }
+                    return location.assign('/');
+                });
+            }
+        }
+    });
+    $('#vm').show();
+});
+</script>
   {% endblock %}
 
 {% block content %}
 
 <div class="bd">
 
-{% if message %}
-  <p style="color:red;text-align:center">{{ message }}</p>
-  {% endif %}
 <div class="login">
     <p style="text-align:center">登录</p>
 </div>
 <div class="form">
-    <form action="/signin" method="post">
-    <input class="un" name="username" placeholder="Username" value='{{ username }}'/>
-    <input class="pw" name="password" placeholder="Password" type="password"/>
-        <input class="sb" placeholder="登录" type="submit"/>
+    <form id="vm" v-on="submit: submit">
+        <div class="uk-alert uk-alert-danger uk-hidden"></div>
+    <input class="un" v-model="email" name="email" placeholder="Email" />
+    <input class="pw" v-model="password" name="password" placeholder="Password" type="password"/>
+        <input class="sb"  type="submit" value="登录" />
     </form>
 </div>
     <div class="uk-width-medium-1-4">

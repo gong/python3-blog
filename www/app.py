@@ -57,7 +57,7 @@ def response_factory(app, handler):
         if isinstance(r, dict):
             template = r.get('__template__')
             if template is None:
-                logging.info('******',r.__dict__)
+                #logging.info('******',r.__dict__)
                 resp = web.Response(#通常class的实例都有一个__dict__属性，它就是一个dict，用来存储实例变量。也有少数例外，比如定义了__slots__的class
                     body=json.dumps(r, ensure_ascii=False, default=lambda o: o.__dict__).encode('utf-8'))
                 resp.content_type = 'application/json;charset=utf-8'
@@ -102,7 +102,7 @@ def data_factory(app, handler):
     def parse_data(request):
         if request.method == 'POST':
             if request.content_type.startswith('application/json'):
-                request.__data__ = yield from request.json()
+                request.__data__ = yield from request.json()#中间件获取来自浏览器的值
                 logging.info('request json: %s' % str(request.__data__))
             elif request.content_type.startswith('application/x-www-form-urlencoded'):
                 request.__data__ = yield from request.post()
@@ -130,8 +130,8 @@ def init(loop):
     logger_factory,data_factory ,auth_factory,response_factory,])
     #app.router.add_route('GET','/',index)#最原始的添加路由的方法
     init_jinja2(app, filters=dict(datetime=datetime_filter))
-    add_routes(app,"handlers")
-    add_static(app)
+    add_routes(app,"handlers")#扫描handlers模块存在的处理器函数进行路由绑定
+    add_static(app)#给web服务器绑定静态资源
     srv=yield from loop.create_server(app.make_handler(),'127.0.0.1',9000)
     logging.info('server started at the http://127.0.0.1:9000...')
     return srv

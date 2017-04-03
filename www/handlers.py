@@ -56,7 +56,7 @@ async def index(request):#为了实现web server 必须创建request handler 它
     return {
         '__template__':'blogs.html',
         'blogs':blogs,
-        '__user__':request.__user__
+        'user':request.__user__
     }
 @get('/api/comments')
 def api_comments(*, page='1'):
@@ -69,9 +69,15 @@ def signin():
     return {
         '__template__':'login.html'
     }
-@post('/signin')
-def signin_form():
-    pass
+@get('/signout')
+async def signout():
+    blogs = await Blog.findAll()
+    r = web.Response()
+    r.del_cookie(COOKIE_NAME)
+    return {
+        '__template__': 'blogs.html',
+        'blogs':blogs
+    }
 # @get('/api/users')
 def api_get_users():
     num = yield from User.findNumber('count(id)')
@@ -96,7 +102,8 @@ async def api_register_user(*, email, name, passwd):
         raise APIValueError('passwd')
     users = await User.findAll('email=?', [email])
     if len(users) > 0:
-        raise APIError('register:failed', 'email', 'Email is already in use.')
+        logging.warning("用户存在")
+        raise APIError('register:failed', 'email', '邮箱已经被注册')
     uid = next_id()
     sha1_passwd = '%s:%s' % (uid, passwd)
     user = User(id=uid, name=name.strip(), email=email, passwd=hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest(), image='http://www.gravatar.com/avatar/%s?d=mm&s=120' % hashlib.md5(email.encode('utf-8')).hexdigest())
@@ -109,7 +116,7 @@ async def api_register_user(*, email, name, passwd):
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
 @get('/register')
-def api_register():
+async def api_register():
     return {
         '__template__':'register.html'
     }
@@ -117,12 +124,12 @@ def api_register():
 @post('/api/authenticate')
 async def authenticate(*, email, passwd):
     if not email:
-        raise APIValueError('email', 'Invalid email.')
+        raise APIValueError('email', '密码错误')
     if not passwd:
-        raise APIValueError('passwd', 'Invalid password.')
+        raise APIValueError('passwd', '密码错误')
     users =await User.findAll('email=?', [email])
     if len(users) == 0:
-        raise APIValueError('email', 'Email not exist.')
+        raise APIValueError('email', '邮箱不存在')
     user = users[0]
     # check passwd:
     sha1 = hashlib.sha1()
@@ -130,7 +137,7 @@ async def authenticate(*, email, passwd):
     sha1.update(b':')
     sha1.update(passwd.encode('utf-8'))
     if user.passwd != sha1.hexdigest():
-        raise APIValueError('passwd', 'Invalid password.')
+        raise APIValueError('passwd', '密码错误')
     # authenticate ok, set cookie:
     r = web.Response()
     r.set_cookie(COOKIE_NAME, user2cookie(user, 86400), max_age=86400, httponly=True)

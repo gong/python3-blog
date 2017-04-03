@@ -92,7 +92,7 @@ class RequestHandler(object):#url处理函数适配器
                     return web.HTTPBadRequest('Json 格式错误')
                 kw=params
             elif ct.startswith('application/xx-www-form-urlencoded') or ct.startswith('multipart/form-data'):
-                params=yield from request.post()
+                params=yield from request.post()#获取来自浏览器的值
                 kw=dict(**params)
             else:
                 return web.HTTPBadRequest('不支持的Content-type:%s'%request.content_type)
