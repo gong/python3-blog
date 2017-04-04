@@ -2,7 +2,7 @@ from aiohttp import web
 #from app import get#循环导入导致AttributeError错误
 from webutils import get,post
 from mymodel import User,Blog,next_id
-from apis import APIError,APIValueError
+from apis import APIError,APIValueError,Page
 import json
 import hashlib
 import re,time
@@ -62,8 +62,22 @@ async def index(request):#为了实现web server 必须创建request handler 它
 def api_comments(*, page='1'):
     pass
 @get('/blog/{id}')
-def get_blog(id):
-    pass
+async def get_blog(id,request):
+    blog=await Blog.find(id)
+    return {
+        '__template__':'blog_view.html',
+        'blog':blog,
+        'user':request.__user__
+    }
+@get('/api/blog/{id}')
+async def get_api_blog(id):
+    blog=await Blog.find(id)
+    return {
+        'name':blog.name,
+        'summary': blog.summary,
+        'content': blog.content,
+    }
+
 @get('/signin')
 def signin():
     return {
@@ -145,3 +159,49 @@ async def authenticate(*, email, passwd):
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
+@get('/api/blogs')
+def api_blogs(*, page=1,request):
+    page_index = page
+    num = yield from Blog.findNumber('count(id)')
+    p = Page(num, int(page_index))
+    if num == 0:
+        return dict(page=p, blogs=())
+    if request.__user__.admin:
+        blogs = yield from Blog.findAll(orderBy='created_at desc',limit=(p.offset, p.limit))
+    else:
+        blogs = yield from Blog.findAll(where='user_id=?',args=[request.__user__.id,],orderBy='created_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, blogs=blogs)
+@get('/manage/blogs')
+def manage_blogs(*,request):
+    return {
+        '__template__': 'manage_blogs.html',
+        'page_index':1,
+        'user':request.__user__
+    }
+@get('/manage/blogs/edit')
+async def edit_blog(id,request):
+    blog=await Blog.find(id)
+    return {
+        '__template__':'edit_blog.html',
+        'user':request.__user__,
+        'id':id,
+    }
+@get('/manage/blogs/create')
+async def create_blog(request):
+    return {
+        '__template__':'create_blog.html',
+        'user':request.__user__
+    }
+@post('/manage/blogs/edit')
+async def edit_save(*,id,content,summary,name):
+    blog1=await Blog.find(id)
+    blog=Blog(id=id,content=content,summary=summary,name=name,user_name=blog1.user_name,user_image=blog1.user_image,user_id=blog1.user_id)
+    await blog.update()
+    return '200'
+@post('/manage/blogs/create')
+async def create_blog_save(content,summary,name,request):
+    id=next_id()
+    user=request.__user__
+    blog=Blog(id=id,content=content,summary=summary,name=name,user_name=user.name,user_image=user.image,user_id=user.id)
+    await blog.save()
+    return '200'

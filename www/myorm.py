@@ -45,6 +45,7 @@ def select(sql,args,size=None):
 @asyncio.coroutine
 def execute(sql,args):#是insert update delete的通用执行函数
     logging.info('sql:%s'%sql)
+    logging.info('args:%s'%args)
     with(yield from __pools) as conn:
         try:
             cur=yield from conn.cursor()
@@ -114,7 +115,7 @@ class ModelMetaclass(type):
     # attrs：类的方法集合
     def __new__(cls, name, bases,attrs):
         #清除Model类本身
-        if name=='Model':
+        if name=='Model':#元类的类的实例化时就会调用一次__new__ 而实际的类是继承Model当实际的类实例化时会调用父类则导致调用一次元类的__new__
             return type.__new__(cls,name,bases,attrs)
         #获取table名称
         tableName=attrs.get('__table__',None) or name
@@ -145,7 +146,7 @@ class ModelMetaclass(type):
         attrs['__fields__']=fields#除主键外的属性名
         # 构造默认的SELECT INSERT UPDATE DELETE 语句
         attrs['__select__']='select %s,%s from %s'%(primaryKey,','.join(escaped_fields),tableName)
-        attrs['__insert__']='insert into %s (%s,%s)value(%s)'%(tableName,','.join(escaped_fields),primaryKey,create_args_string(len(escaped_fields)+1))#create_args_string这个默认字符构造函数没有实现
+        attrs['__insert__']='insert into %s (%s,%s)value(%s)'%(tableName,','.join(escaped_fields),primaryKey,create_args_string(len(escaped_fields)+1))
         attrs['__update__']='update %s set %s where %s=?'%(tableName,','.join(map(lambda f:'%s=?'%(mappings.get(f).name or f),fields)),primaryKey)
         attrs['__delete__']='delete from %s where %s=?'%(tableName,primaryKey)
         return type.__new__(cls,name,bases,attrs)
