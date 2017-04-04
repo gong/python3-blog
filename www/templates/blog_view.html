@@ -76,7 +76,7 @@ $(function () {
                         <p class="uk-comment-meta">{{ comment.created_at|datetime }}</p>
                     </header>
                     <div class="uk-comment-body">
-                        {{ comment.html_content|safe }}
+                        {{ comment.content|safe }}
                     </div>
                 </article>
             </li>

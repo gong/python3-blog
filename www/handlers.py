@@ -1,7 +1,7 @@
 from aiohttp import web
 #from app import get#循环导入导致AttributeError错误
 from webutils import get,post
-from mymodel import User,Blog,next_id
+from mymodel import User,Blog,next_id,Comment
 from apis import APIError,APIValueError,Page
 import json
 import hashlib
@@ -62,13 +62,16 @@ async def index(request):#为了实现web server 必须创建request handler 它
 def api_comments(*, page='1'):
     pass
 @get('/blog/{id}')
-async def get_blog(id,request):
+async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接放在request前面会报错，因为带有默认值得参数需要放在位置参数的后面，但是request需要放在所有参数的后面，所以这里在前面加一个*号
+    logging.warning("打印：%s",t)
     blog=await Blog.find(id)
+    comments=await Comment.findAll(where='blog_id=?',args=[id])
     if blog is not None:
         return {
             '__template__':'blog_view.html',
             'blog':blog,
-            'user':request.__user__
+            'user':request.__user__,
+            'comments':comments
         }
     else:
         return {
@@ -222,4 +225,11 @@ async def create_blog_save(content,summary,name,request):
     user=request.__user__
     blog=Blog(id=id,content=content,summary=summary,name=name,user_name=user.name,user_image=user.image,user_id=user.id)
     await blog.save()
+    return '200'
+@post('/api/blogs/{id}/comments')
+async def create_comment(id,content,request):
+    blog=await Blog.find(id)
+    if blog is not None:
+        com=Comment(blog_id=id,user_id=request.__user__.id,user_image=request.__user__.image,user_name=request.__user__.name,content=content)
+        await com.save()
     return '200'
