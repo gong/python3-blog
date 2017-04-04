@@ -64,11 +64,16 @@ def api_comments(*, page='1'):
 @get('/blog/{id}')
 async def get_blog(id,request):
     blog=await Blog.find(id)
-    return {
-        '__template__':'blog_view.html',
-        'blog':blog,
-        'user':request.__user__
-    }
+    if blog is not None:
+        return {
+            '__template__':'blog_view.html',
+            'blog':blog,
+            'user':request.__user__
+        }
+    else:
+        return {
+            '__template__':'404.html'
+        }
 @get('/api/blog/{id}')
 async def get_api_blog(id):
     blog=await Blog.find(id)
@@ -194,10 +199,23 @@ async def create_blog(request):
     }
 @post('/manage/blogs/edit')
 async def edit_save(*,id,content,summary,name):
-    blog1=await Blog.find(id)
-    blog=Blog(id=id,content=content,summary=summary,name=name,user_name=blog1.user_name,user_image=blog1.user_image,user_id=blog1.user_id)
-    await blog.update()
-    return '200'
+    blog=await Blog.find(id)
+    if blog is not None:
+        blog.summary=summary
+        blog.content=content
+        blog.name=name
+        await blog.update()
+        return '200'
+    else:
+        return '200'
+@post('/api/blogs/{id}/delete')
+async def delete_blog(id):
+    blog=await Blog.find(id)
+    if blog is not None:
+        await blog.remove()
+        return '200'
+    else:
+        return '200'
 @post('/manage/blogs/create')
 async def create_blog_save(content,summary,name,request):
     id=next_id()

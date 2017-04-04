@@ -254,7 +254,7 @@ class Model(dict,metaclass=ModelMetaclass):
             logging.warning('failed to update record affected row :%s'%row)
     @asyncio.coroutine
     def remove(self):
-        args=list(self.getValueOrDefault(self.__primary_key__))
+        args=[self.getValueOrDefault(self.__primary_key__)] #list和[]转换类型有区别 当一个长字符串时list会将字符串变为一个个字符作为list的一个个元素 []则可以将整个字符作为一个list的一个元素
         row=yield from execute(self.__delete__,args)
         if row!=1:
             logging.warning('failed to delete record affected rows:%s'%row)

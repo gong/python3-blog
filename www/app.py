@@ -67,7 +67,7 @@ def response_factory(app, handler):
                 resp.content_type = 'text/html;charset=utf-8'
                 return resp
         if isinstance(r, int) and r >= 100 and r < 600:
-            return web.Response(r)#这里会报错 未知改为全部返回str类型
+            return web.Response(status=r)#这里会报错 改为全部返回str类型
         if isinstance(r, tuple) and len(r) == 2:
             t, m = r
             if isinstance(t, int) and t >= 100 and t < 600:
