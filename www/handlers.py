@@ -52,12 +52,20 @@ async def cookie2user(cookie_str):
 
 @get('/')
 async def index(request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
-    blogs = await Blog.findAll()
-    return {
-        '__template__':'blogs.html',
-        'blogs':blogs,
-        'user':request.__user__
-    }
+    if request.__user__ is not None:
+        if request.__user__.admin:
+            blogs = await Blog.findAll()
+        elif request.__user__.admin is None:
+            blogs = await Blog.findAll(where='user_id=?',args=[request.__user__.id])
+        return {
+            '__template__':'blogs.html',
+            'blogs':blogs,
+            'user':request.__user__
+        }
+    else:
+        return{
+            '__template__':'login.html'
+        }
 @get('/api/comments')
 def api_comments(*, page='1'):
     pass
@@ -92,14 +100,20 @@ def signin():
         '__template__':'login.html'
     }
 @get('/signout')
-async def signout():
-    blogs = await Blog.findAll()
-    r = web.Response()
-    r.del_cookie(COOKIE_NAME)
-    return {
-        '__template__': 'blogs.html',
-        'blogs':blogs
-    }
+async def signout(request):
+    # blogs = await Blog.findAll(where='user_id=?',args=[request.__user__.id])
+    # r = web.Response()
+    # r.del_cookie(COOKIE_NAME)
+    # return r
+    # return {
+    #     '__template__': 'blogs.html',
+    #     'blogs':blogs
+    # }
+    referer = request.headers.get('Referer')
+    r = web.HTTPFound(referer or '/')
+    r.set_cookie(COOKIE_NAME,'-deleted-', max_age=0, httponly=True)
+    logging.info('user signed out.')
+    return r
 # @get('/api/users')
 def api_get_users():
     num = yield from User.findNumber('count(id)')
@@ -181,11 +195,16 @@ def api_blogs(*, page=1,request):
     return dict(page=p, blogs=blogs)
 @get('/manage/blogs')
 def manage_blogs(*,page=1,request):
-    return {
-        '__template__': 'manage_blogs.html',
-        'page_index':page,
-        'user':request.__user__
-    }
+    if request.__user__ is not None:
+        return {
+            '__template__': 'manage_blogs.html',
+            'page_index':page,
+            'user':request.__user__
+        }
+    else:
+        return {
+            '__template__':'login.html'
+        }
 @get('/manage/blogs/edit')
 async def edit_blog(id,request):
     blog=await Blog.find(id)
