@@ -60,8 +60,8 @@ async def index(*,request):#为了实现web server 必须创建request handler �
         'user': request.__user__,
         'blogtags':blogtags
     }
-@get('/{id}')
-async def index2(*,id,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
+@get('/tag/{id}')
+async def index2(*,id,request):
     blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
     blogtags=await BlogTags.findAll()
     return {
@@ -126,6 +126,7 @@ async def signout(request):
     r.content_type = 'application/json'
     user=None
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
+    #r.location='/'
     return r
 @get('/api/users')
 def api_get_users(*,page=1,request):
