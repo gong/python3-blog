@@ -4,7 +4,7 @@
 
 {% block beforehead %}
 
-<script>
+<script xmlns:v-bind="http://www.w3.org/1999/xhtml">
 
 var
     ID = '{{ id }}',
@@ -18,7 +18,7 @@ function initVM(blog) {
             submit: function (event) {
                 event.preventDefault();
                 var $form = $('#vm').find('form');
-                this.$data['id']='{{id}}';
+                this.$data['id']='{{ id }}';
                 $form.postJSON(action, this.$data, function (err, r) {
                     if (err) {
                         $form.showFormError(err);
@@ -48,7 +48,9 @@ $(function () {
         initVM({
             name: '',
             summary: '',
-            content: ''
+            content: '',
+            blogtags:'',
+            tag:''
         });
     }
 });
@@ -79,6 +81,14 @@ $(function () {
     <div id="vm" class="uk-width-2-3">
         <form v-on="submit: submit" class="uk-form uk-form-stacked">
             <div class="uk-alert uk-alert-danger uk-hidden"></div>
+            <div class="uk-from-row">
+                <label class="uk-form-label">标签:</label>
+                <select v-model="tag"><!--官方的vue绑定下拉没有效果http://cn.vuejs.org/v2/guide/forms.html#复选框  改成这样有效果-->
+                <option v-model="tag" v-repeat="tag: blogtags" value="{{tag.id}}">
+                    {{tag.name}}
+                </option>
+                </select>
+            </div>
             <div class="uk-form-row">
                 <label class="uk-form-label">标题:</label>
                 <div class="uk-form-controls">

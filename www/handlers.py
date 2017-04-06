@@ -1,7 +1,7 @@
 from aiohttp import web
 #from app import get#循环导入导致AttributeError错误
 from webutils import get,post
-from mymodel import User,Blog,next_id,Comment
+from mymodel import User,Blog,next_id,Comment,BlogTags
 from apis import APIError,APIValueError,Page
 import json
 import hashlib
@@ -51,12 +51,24 @@ async def cookie2user(cookie_str):
         return None
 
 @get('/')
-async def index(request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
+async def index(*,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
     blogs = await Blog.findAll()
+    blogtags=await BlogTags.findAll()
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,
-        'user': request.__user__
+        'user': request.__user__,
+        'blogtags':blogtags
+    }
+@get('/{id}')
+async def index2(*,id,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
+    blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
+    blogtags=await BlogTags.findAll()
+    return {
+        '__template__': 'blogs.html',
+        'blogs': blogs,
+        'user': request.__user__,
+        'blogtags':blogtags
     }
 
 @get('/api/comments')
@@ -81,10 +93,14 @@ async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接�
 @get('/api/blog/{id}')
 async def get_api_blog(id):
     blog=await Blog.find(id)
+    blogtags=await BlogTags.findAll()
+    blogtags=[dict(id=tag.id,name=tag.name) for tag in blogtags]
     return {
         'name':blog.name,
         'summary': blog.summary,
         'content': blog.content,
+        'blogtags':blogtags,
+        'tag':''
     }
 
 @get('/signin')
@@ -259,17 +275,21 @@ async def edit_blog(id,request):
         return '<script>alert("文章不存在已经丢失");location.assign("/")</script>'
 @get('/manage/blogs/create')
 async def create_blog(request):
+    blogtags=await BlogTags.findAll()
+    blogtags=[dict(id=tag.id,name=tag.name) for tag in blogtags]
     return {
         '__template__':'create_blog.html',
-        'user':request.__user__
+        'user':request.__user__,
+        'blogtags':blogtags
     }
 @post('/manage/blogs/edit')
-async def blog_edit_save(*,id,content,summary,name):
+async def blog_edit_save(*,id,tag,content,summary,name):
     blog=await Blog.find(id)
     if blog is not None:
         blog.summary=summary
         blog.content=content
         blog.name=name
+        blog.blogtag_id=tag
         await blog.update()
     return '200'
 @post('/api/blogs/{id}/delete')
@@ -279,10 +299,10 @@ async def delete_blog(id):
         await blog.remove()
     return '200'
 @post('/manage/blogs/create')
-async def create_blog_save(content,summary,name,request):
+async def create_blog_save(content,tag,summary,name,request):
     id=next_id()
     user=request.__user__
-    blog=Blog(id=id,content=content,summary=summary,name=name,user_name=user.name,user_image=user.image,user_id=user.id)
+    blog=Blog(id=id,content=content,summary=summary,name=name,user_name=user.name,user_image=user.image,user_id=user.id,blogtag_id=tag)
     await blog.save()
     return '200'
 @post('/api/blogs/{id}/comments')
@@ -322,3 +342,69 @@ async def api_comments(*,page=1):
         return dict(page=p, comments=())
     comments = await Comment.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
     return dict(page=p, comments=comments)
+@get('/manage/blogtags')
+def manage_blogtags(*,page=1,request):
+    if request.__user__ is not None:
+        if request.__user__.admin:
+            return {
+                '__template__':'manage_blogtags.html',
+                'user':request.__user__,
+                'page_index':page
+            }
+        else:
+            return '<script>alert("你没有权限进入");location.assign("/");</script>'
+    else:
+        return {
+            '__template__': 'login.html'
+        }
+@get('/api/blogtags')
+async def api_blogtags(*,page=1):
+    page_index=page
+    num=await BlogTags.findNumber('count(id)')
+    p=Page(num,int(page_index))
+    if num==0:
+        return dict(page=p,api_blogtags=())
+    blogtags=await BlogTags.findAll(orderBy='created_at desc', limit=(p.offset,p.limit))
+    return dict(page=p,blogtags=blogtags)
+@get('/manage/blogtags/create')
+async def create_blogtag(request):
+    return {
+        '__template__':'create_blogtag.html',
+        'user':request.__user__
+    }
+@post('/manage/blogtags/create')
+async def create_blogtag_save(name,remarks,request):
+    id=next_id()
+    blogtag=BlogTags(id=id,name=name,remarks=remarks)
+    await blogtag.save()
+    return '200'
+@post('/api/blogtags/{id}/delete')
+async def delete_blogtag(id):
+    blogtag=await BlogTags.find(id)
+    if blogtag is not None:
+        await blogtag.remove()
+    return '200'
+@get('/manage/blogtags/edit/{id}')
+async def edit_blogtag(id,request):
+    blogtag=BlogTags.find(id)
+    if blogtag is not None:
+        return {
+            '__template__':'edit_blogtag.html',
+            'user':request.__user__,
+            'id':id
+        }
+@get('/api/blogtag/{id}')
+async def api_blogtag():
+    blogtag=await BlogTags.find(id)
+    return {
+        'name':blogtag.name,
+        'remarks':blogtag.remarks
+    }
+@post('/manage/blogtags/edit')
+async def blogtag_edit_save(*,id,name,remarks):
+    blogtag=await BlogTags.find(id)
+    if blogtag is not None:
+        blogtag.name=name,
+        blogtag.remarks=remarks
+        await blogtag.update()
+    return '200'
