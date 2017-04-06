@@ -223,16 +223,13 @@ async def authenticate(*, email, passwd):
     r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
 @get('/api/blogs')
-def api_blogs(*, page=1,request):
+async def api_blogs(*, page=1):
     page_index = page
-    num = yield from Blog.findNumber('count(id)')
+    num = await Blog.findNumber('count(id)')
     p = Page(num, int(page_index))
     if num == 0:
         return dict(page=p, blogs=())
-    if request.__user__.admin:
-        blogs = yield from Blog.findAll(orderBy='created_at desc',limit=(p.offset, p.limit))
-    else:
-        blogs = yield from Blog.findAll(where='user_id=?',args=[request.__user__.id,],orderBy='created_at desc', limit=(p.offset, p.limit))
+    blogs = await Blog.findAll(orderBy='created_at desc',limit=(p.offset, p.limit))
     return dict(page=p, blogs=blogs)
 @get('/manage/blogs')
 def manage_blogs(*,page=1,request):
@@ -301,3 +298,27 @@ async def delete_comment(id):
     if comment is not None:
         await comment.remove()
     return '200'
+@get('/manage/comments')
+def manage_comments(*,page=1,request):
+    if request.__user__ is not None:
+        if request.__user__.admin:
+            return {
+                '__template__':'manage_comments.html',
+                'user':request.__user__,
+                'page_index':page
+            }
+        else:
+            return '<script>alert("你没有权限进入");location.assign("/");</script>'
+    else:
+        return {
+            '__template__': 'login.html'
+        }
+@get('/api/comments')
+async def api_comments(*,page=1):
+    page_index = page
+    num = await Comment.findNumber('count(id)')
+    p = Page(num, int(page_index))
+    if num == 0:
+        return dict(page=p, comments=())
+    comments = await Comment.findAll(orderBy='created_at desc', limit=(p.offset, p.limit))
+    return dict(page=p, comments=comments)
