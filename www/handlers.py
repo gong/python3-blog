@@ -52,20 +52,13 @@ async def cookie2user(cookie_str):
 
 @get('/')
 async def index(request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
-    if request.__user__ is not None:
-        if request.__user__.admin:
-            blogs = await Blog.findAll()
-        elif request.__user__.admin is None:
-            blogs = await Blog.findAll(where='user_id=?',args=[request.__user__.id])
-        return {
-            '__template__':'blogs.html',
-            'blogs':blogs,
-            'user':request.__user__
-        }
-    else:
-        return{
-            '__template__':'login.html'
-        }
+    blogs = await Blog.findAll()
+    return {
+        '__template__': 'blogs.html',
+        'blogs': blogs,
+        'user': request.__user__
+    }
+
 @get('/api/comments')
 def api_comments(*, page='1'):
     pass
@@ -95,10 +88,11 @@ async def get_api_blog(id):
     }
 
 @get('/signin')
-def signin():
+async def signin():
     return {
         '__template__':'login.html'
     }
+
 @get('/signout')
 async def signout(request):
     # blogs = await Blog.findAll(where='user_id=?',args=[request.__user__.id])
@@ -113,17 +107,64 @@ async def signout(request):
     r = web.HTTPFound(referer or '/')
     r.set_cookie(COOKIE_NAME,'-deleted-', max_age=0, httponly=True)
     logging.info('user signed out.')
+    r.content_type = 'application/json'
+    user=None
+    r.body = json.dumps(user, ensure_ascii=False).encode('utf-8')
     return r
-# @get('/api/users')
-def api_get_users():
+@get('/api/users')
+def api_get_users(*,page=1,request):
+    page_index=page
     num = yield from User.findNumber('count(id)')
+    p = Page(num, int(page_index))
     if num == 0:
-        return dict(users=())
-    users = yield from User.findAll(orderBy='created_at desc')
+        return dict(page=p,users=())
+    users = yield from User.findAll(orderBy='created_at desc',limit=(p.offset, p.limit))
     for u in users:
         u.passwd = '******'
-    return dict(users=users)
+    return dict(page=p,users=users)
+@post('/api/users/{id}/delete')
+async def delete_user(id):
+    user=await User.find(id)
+    if user is not None and user.admin is None:
+        await user.remove()
+    return '200'
+@get('/manage/users/edit/{id}')
+async def edit_user(id,request):
+    user=await User.find(id)
+    if user is not None:
+        return {
+            '__template__':'edit_user.html',
+            'user2':user,
+            'user':request.__user__
+        }
+    else:
+        return '<script>alert("编辑的用户不存在");function(){vart = new Date().getTime(),url = location.pathname;if (location.search) {url = url + location.search + "&t=" + t;}else {url = url + "?t=" + t;}location.assign(url);}</script>'
+@post('/manage/users/edit')
+async def user_edit_save(passwd,id):
+    user=await User.find(id)
+    if user is not None:
+        uid=next_id()
+        sha1_passwd="%s:%s"%(uid,passwd)
+        hashlib.sha1(sha1_passwd.encode('utf-8')).hexdigest()
+        user.passwd=passwd
+        await user.update()
+    return '200'
 
+@get('/manage/users')
+def manage_users(*,page=1,request):
+    if request.__user__ is not None:
+        if request.__user__.admin:
+            return {
+                '__template__': 'manage_users.html',
+                'page_index':page,
+                'user': request.__user__
+            }
+        else:
+            return '<script>alert("非法的访问");location.assign("/")</script>'
+    else:
+        return {
+            '__template__':'login.html'
+        }
 _RE_EMAIL = re.compile(r'^[a-z0-9\.\-\_]+\@[a-z0-9\-\_]+(\.[a-z0-9\-\_]+){1,4}$')
 _RE_SHA1 = re.compile(r'^[0-9a-f]{40}$')
 
@@ -196,11 +237,14 @@ def api_blogs(*, page=1,request):
 @get('/manage/blogs')
 def manage_blogs(*,page=1,request):
     if request.__user__ is not None:
-        return {
-            '__template__': 'manage_blogs.html',
-            'page_index':page,
-            'user':request.__user__
-        }
+        if request.__user__.admin:
+            return {
+                '__template__': 'manage_blogs.html',
+                'page_index':page,
+                'user':request.__user__
+            }
+        else:
+            return '<script>alert("你没有权限进入");location.assign("/");</script>'
     else:
         return {
             '__template__':'login.html'
@@ -208,11 +252,14 @@ def manage_blogs(*,page=1,request):
 @get('/manage/blogs/edit')
 async def edit_blog(id,request):
     blog=await Blog.find(id)
-    return {
-        '__template__':'edit_blog.html',
-        'user':request.__user__,
-        'id':id,
-    }
+    if blog is not None:
+        return {
+            '__template__':'edit_blog.html',
+            'user':request.__user__,
+            'id':id,
+        }
+    else:
+        return '<script>alert("文章不存在已经丢失");location.assign("/")</script>'
 @get('/manage/blogs/create')
 async def create_blog(request):
     return {
@@ -220,24 +267,20 @@ async def create_blog(request):
         'user':request.__user__
     }
 @post('/manage/blogs/edit')
-async def edit_save(*,id,content,summary,name):
+async def blog_edit_save(*,id,content,summary,name):
     blog=await Blog.find(id)
     if blog is not None:
         blog.summary=summary
         blog.content=content
         blog.name=name
         await blog.update()
-        return '200'
-    else:
-        return '200'
+    return '200'
 @post('/api/blogs/{id}/delete')
 async def delete_blog(id):
     blog=await Blog.find(id)
     if blog is not None:
         await blog.remove()
-        return '200'
-    else:
-        return '200'
+    return '200'
 @post('/manage/blogs/create')
 async def create_blog_save(content,summary,name,request):
     id=next_id()
@@ -251,4 +294,10 @@ async def create_comment(id,content,request):
     if blog is not None:
         com=Comment(blog_id=id,user_id=request.__user__.id,user_image=request.__user__.image,user_name=request.__user__.name,content=content)
         await com.save()
+    return '200'
+@post('/api/comments/{id}/delete')
+async def delete_comment(id):
+    comment=await Comment.find(id)
+    if comment is not None:
+        await comment.remove()
     return '200'

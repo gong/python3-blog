@@ -54,7 +54,7 @@
                     <a target="_blank" href="#" class="uk-icon-button uk-icon-linkedin-square"></a>
                     <a target="_blank" href="#" class="uk-icon-button uk-icon-twitter"></a>
                 </p>
-                <p>Powered by <a href="#">Python Webapp</a>. Copyright &copy; 2017. [<a href="/manage/blogs" target="_blank">管理</a>]</p>
+                <p>Powered by <a href="#">Python Webapp</a>. Copyright &copy; 2017. {%if user and user.admin%}[<a href="/manage/blogs" target="_blank">管理</a>]{%endif%}</p>
                 <p><a href="http://www.xxxx.com/" target="_blank">www.xxxx.com</a>. All rights reserved.</p>
                 <a target="_blank" href="#"><i class="uk-icon-html5" style="font-size:64px; color: #444;"></i></a>
             </div>
