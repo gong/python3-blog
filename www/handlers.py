@@ -385,7 +385,7 @@ async def delete_blogtag(id):
     if blogtag is not None:
         await blogtag.remove()
     return '200'
-@get('/manage/blogtags/edit/{id}')
+@get('/manage/blogtags/edit')
 async def edit_blogtag(id,request):
     blogtag=BlogTags.find(id)
     if blogtag is not None:
@@ -395,7 +395,7 @@ async def edit_blogtag(id,request):
             'id':id
         }
 @get('/api/blogtag/{id}')
-async def api_blogtag():
+async def api_blogtag(id):
     blogtag=await BlogTags.find(id)
     return {
         'name':blogtag.name,

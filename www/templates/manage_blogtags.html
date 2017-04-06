@@ -74,7 +74,7 @@ $(function() {
                 </td>
 
                 <td>
-                    <span v-text="blogtag.created_at.toDateTime()"></span>
+                    <span v-text=toSmartDate({{blogtag.created_at}})></span>
                 </td>
                 <td>
                     <a href="#0" v-on="click: edit_blog(blogtag)"><i class="uk-icon-edit"></i></a>
