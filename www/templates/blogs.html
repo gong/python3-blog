@@ -24,12 +24,14 @@
     </div>
 
      <div class="uk-width-medium-1-4">
+         {% if admin %}
          <div class="uk-panel uk-panel-box">
             <div class="uk-text-center">
-                <img class="uk-border-circle" width="120" height="120" src="{{ blogs[0].user_image }}">
-                <h3>{{ blogs[0].user_name }}</h3>
+                <img class="uk-border-circle" width="120" height="120" src="{{ admin.image }}">
+                <h3>{{ admin.name }}</h3>
             </div>
         </div>
+         {%endif%}
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">文件归档</h3>
             <ul class="uk-list uk-list-line">

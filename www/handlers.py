@@ -54,21 +54,29 @@ async def cookie2user(cookie_str):
 async def index(*,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
     blogs = await Blog.findAll()
     blogtags=await BlogTags.findAll()
+    admin = await User.findAll(where="admin=?", args=['1'])
+    admin=admin[0]
+    admin.passwd = "******"
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,
         'user': request.__user__,
-        'blogtags':blogtags
+        'blogtags':blogtags,
+        'admin':admin
     }
 @get('/tag/{id}')
 async def index2(*,id,request):
     blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
+    admin=await User.findAll(where="admin=?",args=['1'])
+    admin=admin[0]
+    admin.passwd="******"
     blogtags=await BlogTags.findAll()
     return {
         '__template__': 'blogs.html',
         'blogs': blogs,
         'user': request.__user__,
-        'blogtags':blogtags
+        'blogtags':blogtags,
+        'admin':admin
     }
 
 @get('/api/comments')

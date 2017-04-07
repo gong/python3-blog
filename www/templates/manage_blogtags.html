@@ -50,7 +50,7 @@ $(function() {
                 <li><a href="/manage/comments">评论</a></li>
                 <li><a href="/manage/blogs">日志</a></li>
                 <li><a href="/manage/users">用户</a></li>
-                <li class="uk-active" ><a href="/manage/blogtags">日志标签</a></li>
+                <li><a href="/manage/blogtags">日志标签</a></li>
             </ul>
         </div>
     {% endif %}
@@ -68,17 +68,17 @@ $(function() {
             </tr>
         </thead>
         <tbody>
-            <tr v-repeat="blogtag: blogtags" >
+            <tr v-repeat="tag: blogtags" >
                 <td>
-                    <a href="#0" v-text="blogtag.name"></a>
+                    <a href="#0" v-text="tag.name"></a>
                 </td>
 
                 <td>
-                    <span v-text=toSmartDate({{blogtag.created_at}})></span>
+                    <span v-text=tag.created_at.toDateTime()></span>
                 </td>
                 <td>
-                    <a href="#0" v-on="click: edit_blog(blogtag)"><i class="uk-icon-edit"></i></a>
-                    <a href="#0" v-on="click: delete_blog(blogtag)"><i class="uk-icon-trash-o"></i></a>
+                    <a href="#0" v-on="click: edit_blog(tag)"><i class="uk-icon-edit"></i></a>
+                    <a href="#0" v-on="click: delete_blog(tag)"><i class="uk-icon-trash-o"></i></a>
                 </td>
             </tr>
         </tbody>
