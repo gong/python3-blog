@@ -8,6 +8,8 @@ import hashlib
 import re,time
 from config import configs
 import logging
+import markdown
+
 logging.basicConfig(level=logging.INFO)
 COOKIE_NAME = 'webappsession'
 _COOKIE_KEY = configs.session.secret
@@ -53,6 +55,10 @@ async def cookie2user(cookie_str):
 @get('/')
 async def index(*,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
     blogs = await Blog.findAll()
+    i=0
+    for blog in blogs:
+        blogs[i].html_summary=markdown.markdown(blogs[i].summary)
+        i+=1
     blogtags=await BlogTags.findAll()
     admin = await User.findAll(where="admin=?", args=['1'])
     admin=admin[0]
@@ -67,6 +73,10 @@ async def index(*,request):#为了实现web server 必须创建request handler �
 @get('/tag/{id}')
 async def index2(*,id,request):
     blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
+    i = 0
+    for blog in blogs:
+        blogs[i].html_summary = markdown.markdown(blogs[i].summary)#extensions=['extra', 'codehilite']
+        i+=1
     admin=await User.findAll(where="admin=?",args=['1'])
     admin=admin[0]
     admin.passwd="******"
@@ -86,7 +96,12 @@ def api_comments(*, page='1'):
 async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接放在request前面会报错，因为带有默认值得参数需要放在位置参数的后面，但是request需要放在所有参数的后面，所以这里在前面加一个*号
     logging.warning("打印：%s",t)
     blog=await Blog.find(id)
+    blog.html_content=markdown.markdown(blog.content,extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite'])
     comments=await Comment.findAll(where='blog_id=?',args=[id])
+    i=0
+    for com in comments:
+        comments[i].html_content=markdown.markdown(comments[i].content,extensions=['extra', 'codehilite'])
+        i+=1
     if blog is not None:
         return {
             '__template__':'blog_view.html',

@@ -3,6 +3,9 @@
 {% block title %}{{ blog.name }}{% endblock %}
 
 {% block beforehead %}
+<style>
+
+</style>
 
 <script>
 
@@ -44,7 +47,7 @@ $(function () {
         <article class="uk-article">
             <h2>{{ blog.name }}</h2>
             <p class="uk-article-meta">发表于{{ blog.created_at|datetime }}</p>
-            <p>{{ blog.content|safe }}</p>
+            <pre>{{ blog.html_content|safe }}</pre>
         </article>
 
         <hr class="uk-article-divider">
@@ -86,7 +89,7 @@ $(function () {
                         <p class="uk-comment-meta">{{ comment.created_at|datetime }}</p>
                     </header>
                     <div class="uk-comment-body">
-                        {{ comment.content|safe }}
+                        <pre>{{ comment.html_content|safe }}</pre>
                     </div>
                 </article>
             </li>

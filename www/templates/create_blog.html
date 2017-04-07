@@ -5,7 +5,7 @@
 {% block beforehead %}
 
 <script>
-action='{{action}}'
+
 function initVM(blog) {
     var vm = new Vue({
         el: '#vm',
@@ -14,7 +14,7 @@ function initVM(blog) {
             submit: function (event) {
                 event.preventDefault();
                 var $form = $('#vm').find('form');
-                $form.postJSON(action, this.$data, function (err, r) {
+                $form.postJSON('/manage/blogs/create', this.$data, function (err, r) {
                     if (err) {
                         $form.showFormError(err);
                     }
