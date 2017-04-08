@@ -47,7 +47,7 @@ $(function () {
         <article class="uk-article">
             <h2>{{ blog.name }}</h2>
             <p class="uk-article-meta">发表于{{ blog.created_at|datetime }}</p>
-            <pre>{{ blog.html_content|safe }}</pre>
+            <p>{{ blog.html_content|safe }}</p>
         </article>
 
         <hr class="uk-article-divider">
@@ -89,7 +89,7 @@ $(function () {
                         <p class="uk-comment-meta">{{ comment.created_at|datetime }}</p>
                     </header>
                     <div class="uk-comment-body">
-                        <pre>{{ comment.html_content|safe }}</pre>
+                        <p>{{ comment.html_content|safe }}</p>
                     </div>
                 </article>
             </li>

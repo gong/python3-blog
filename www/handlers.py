@@ -57,7 +57,7 @@ async def index(*,request):#为了实现web server 必须创建request handler �
     blogs = await Blog.findAll()
     i=0
     for blog in blogs:
-        blogs[i].html_summary=markdown.markdown(blogs[i].summary)
+        blogs[i].html_summary=markdown.markdown(blogs[i].summary,extensions=['extra', 'codehilite'])
         i+=1
     blogtags=await BlogTags.findAll()
     admin = await User.findAll(where="admin=?", args=['1'])
@@ -75,7 +75,7 @@ async def index2(*,id,request):
     blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
     i = 0
     for blog in blogs:
-        blogs[i].html_summary = markdown.markdown(blogs[i].summary)#extensions=['extra', 'codehilite']
+        blogs[i].html_summary = markdown.markdown(blogs[i].summary,extensions=['extra', 'codehilite'])#extensions=['extra', 'codehilite']
         i+=1
     admin=await User.findAll(where="admin=?",args=['1'])
     admin=admin[0]
@@ -92,15 +92,26 @@ async def index2(*,id,request):
 @get('/api/comments')
 def api_comments(*, page='1'):
     pass
+
 @get('/blog/{id}')
 async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接放在request前面会报错，因为带有默认值得参数需要放在位置参数的后面，但是request需要放在所有参数的后面，所以这里在前面加一个*号
-    logging.warning("打印：%s",t)
     blog=await Blog.find(id)
-    blog.html_content=markdown.markdown(blog.content,extensions=['markdown.extensions.extra', 'markdown.extensions.codehilite'])
+    logging.warning('看blog_id:%s',blog.content)
+    #blog.content=blog.content.replace('\n','<br>')
+    logging.warning('看blog_id:%s', blog.content)
+    blog.html_content=markdown.markdown(blog.content,extensions=['extra', 'codehilite'])
+    blog.html_content = blog.html_content.replace('\n', '<br>')
+    #blog.html_content=blog.html_content.replace('&lt;br&gt;','<br>')
+    #blog.html_content = blog.html_content.replace(' ', '&nbsp;')
+    #blog.html_content = blog.html_content.replace('<code>', '<pre><code>')
+    #blog.html_content = blog.html_content.replace('</code>', '</code></pre>')
+    logging.warning("看我:%s",blog.html_content)
     comments=await Comment.findAll(where='blog_id=?',args=[id])
     i=0
     for com in comments:
+        #comments[i].content=comments[i].content.replace('\n','<br>')
         comments[i].html_content=markdown.markdown(comments[i].content,extensions=['extra', 'codehilite'])
+        comments[i].html_content=comments[i].html_content.replace('\n','<br>')
         i+=1
     if blog is not None:
         return {
@@ -113,9 +124,12 @@ async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接�
         return {
             '__template__':'404.html'
         }
+#_RE_EDIT_CONTENT=re.compile('<br/>')
 @get('/api/blog/{id}')
 async def get_api_blog(id):
     blog=await Blog.find(id)
+    #content = _RE_EDIT_CONTENT.subn(r'\n', blog.content)
+    logging.warning('看get_api%s',blog.content)
     blogtags=await BlogTags.findAll()
     blogtags=[dict(id=tag.id,name=tag.name) for tag in blogtags]
     return {
@@ -181,6 +195,7 @@ async def edit_user(id,request):
         return '<script>alert("编辑的用户不存在");function(){vart = new Date().getTime(),url = location.pathname;if (location.search) {url = url + location.search + "&t=" + t;}else {url = url + "?t=" + t;}location.assign(url);}</script>'
 @post('/manage/users/edit')
 async def user_edit_save(passwd,id):
+
     user=await User.find(id)
     if user is not None:
         uid=next_id()
@@ -308,10 +323,11 @@ async def create_blog(request):
     }
 @post('/manage/blogs/edit')
 async def blog_edit_save(*,id,tag,content,summary,name):
+    logging.warning('看content:%s',content)
     blog=await Blog.find(id)
     if blog is not None:
         blog.summary=summary
-        blog.content=content
+        blog.content=content.replace(r'\n','<br>')
         blog.name=name
         blog.blogtag_id=tag
         await blog.update()
