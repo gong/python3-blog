@@ -124,12 +124,10 @@ async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接�
         return {
             '__template__':'404.html'
         }
-#_RE_EDIT_CONTENT=re.compile('<br/>')
+#TODO 这里还有bug 标签id前端默认的返回空值 必须点击下拉框中其他的选项后才会有用 前端设置了默认值
 @get('/api/blog/{id}')
 async def get_api_blog(id):
     blog=await Blog.find(id)
-    #content = _RE_EDIT_CONTENT.subn(r'\n', blog.content)
-    logging.warning('看get_api%s',blog.content)
     blogtags=await BlogTags.findAll()
     blogtags=[dict(id=tag.id,name=tag.name) for tag in blogtags]
     return {
@@ -137,7 +135,7 @@ async def get_api_blog(id):
         'summary': blog.summary,
         'content': blog.content,
         'blogtags':blogtags,
-        'tag':''
+        'tag':blog.blogtag_id,
     }
 
 @get('/signin')

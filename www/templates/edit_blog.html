@@ -4,7 +4,7 @@
 
 {% block beforehead %}
 
-<script xmlns:v-bind="http://www.w3.org/1999/xhtml">
+<script>
 
 var
     ID = '{{ id }}',
@@ -40,7 +40,13 @@ $(function () {
                 return fatal(err);
             }
             $('#loading').hide();
-            initVM(blog);
+            initVM({
+             name: blog.name,
+            summary: blog.summary,
+            content: blog.content,
+            blogtags:blog.blogtags,
+            tag:blog.blogtags[0].id
+            });
         });
     }
     else {
@@ -85,8 +91,8 @@ $(function () {
             <div class="uk-from-row">
                 <label class="uk-form-label">标签:</label>
                 <select v-model="tag"><!--官方的vue绑定下拉没有效果http://cn.vuejs.org/v2/guide/forms.html#复选框  改成这样有效果-->
-                <option v-model="tag" v-repeat="tag: blogtags" value="{{tag.id}}">
-                    {{tag.name}}
+                <option v-model="tag" v-repeat="blogtag: blogtags" value="{{blogtag.id}}">
+                    {{blogtag.name}}
                 </option>
                 </select>
             </div>
