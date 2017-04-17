@@ -61,15 +61,24 @@ async def index(*,request):#为了实现web server 必须创建request handler �
         i+=1
     blogtags=await BlogTags.findAll()
     admin = await User.findAll(where="admin=?", args=['1'])
-    admin=admin[0]
-    admin.passwd = "******"
-    return {
-        '__template__': 'blogs.html',
-        'blogs': blogs,
-        'user': request.__user__,
-        'blogtags':blogtags,
-        'admin':admin
-    }
+    if len(admin)!=0:
+        admin=admin[0]
+        admin.passwd = "******"
+        return {
+            '__template__': 'blogs.html',
+            'blogs': blogs,
+            'user': request.__user__,
+            'blogtags':blogtags,
+            'admin':admin
+        }
+    else:
+        return {
+            '__template__': 'blogs.html',
+            'blogs': blogs,
+            'user': request.__user__,
+            'blogtags':blogtags,
+            'admin':None
+        }
 @get('/tag/{id}')
 async def index2(*,id,request):
     blogs=await Blog.findAll(where="blogtag_id=?",args=[id])
