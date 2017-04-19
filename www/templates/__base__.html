@@ -22,6 +22,20 @@
 //Vue.config.unsafeDelimiters = ['{!!', '!!}']
 // 修改原生 HTML 插值的定界符。
     </script>
+    <style>
+        .form__video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%,-50%);
+    -ms-transform: translate(-50%,-50%);
+    transform: translate(-50%,-50%);
+    min-width: 100%;
+    min-height: 100%;
+    opacity: .4;
+    z-index: 1;
+}
+    </style>
 </head>
 <body>
     <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
@@ -54,9 +68,9 @@
             <!-- // content -->
         </div>
     </div>
-
-    <div class="uk-margin-large-top" style="background-color:#eee; border-top:1px solid #ccc;">
-        <div class="uk-container uk-container-center uk-text-center">
+    <div class="uk-margin-large-top" style="background-color:#c1daed; border-top:1px solid #ccc;position:relative ;
+    overflow: hidden;">
+        <div class="uk-container uk-container-center uk-text-center" style="z-index:2;position: relative;">
             <div class="uk-panel uk-margin-top uk-margin-bottom">
                 <p>
                     <a target="_blank" href="https://github.com/gong" class="uk-icon-button uk-icon-github"></a>
@@ -66,6 +80,9 @@
                 <a target="_blank" href="#"><i class="uk-icon-html5" style="font-size:64px; color: #444;"></i></a>
             </div>
         </div>
+      <video class="form__video" loop="" autoplay="" muted="">
+    <source src="/static/images/iStock-628653202.mp4?t=1492599691853" type="video/mp4">
+       </video>
     </div>
 </body>
 </html>
