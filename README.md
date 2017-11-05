@@ -5,7 +5,7 @@ python3开发个人博客
 * `sudo pip3 install aiomysql `
 * `sudo pip3 install aiohttp`
 * `sudo pip3 install markdown`
-* `sudo apti install nginx`
+* `sudo apt install nginx`
 * `sudo apt install mysql-server`
 * `sudo apt install mysql-client-core-5.6`
 * `sudo apt install mysql-client-5.6`
