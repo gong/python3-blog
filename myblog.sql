@@ -4,13 +4,13 @@ Navicat MySQL Data Transfer
 Source Server         : localhost_3306
 Source Server Version : 50621
 Source Host           : 127.0.0.1:3306
-Source Database       : webapp
+Source Database       : myblog
 
 Target Server Type    : MYSQL
 Target Server Version : 50621
 File Encoding         : 65001
 
-Date: 2017-04-16 20:38:11
+Date: 2017-11-05 22:22:47
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -29,6 +29,7 @@ CREATE TABLE `blogs` (
   `content` mediumtext NOT NULL,
   `created_at` double NOT NULL,
   `blogtag_id` varchar(50) DEFAULT NULL,
+  `count` bigint(20) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_created_at` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -2,19 +2,45 @@
 <html>
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="360-site-verification" content="042b10540083e51eb5f017acde8a2f41" />
+    <meta name="sogou_site_verification" content="j1PKRC0QF3"/>
     {% block meta %}<!-- block meta  -->{% endblock %}
     <title>{% block title %} ? {% endblock %} -博客</title>
     <link rel="stylesheet" href="/static/css/uikit.min.css">
     <link rel="stylesheet" href="/static/css/uikit.gradient.min.css">
-
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/sha1.min.js"></script>
     <script src="/static/js/uikit.min.js"></script>
     <script src="/static/js/sticky.min.js"></script>
     <script src="/static/js/vue.min.js"></script>
     <script src="/static/js/awesome.js"></script>
+    <link rel="stylesheet" href="/static/css/github.css">
     {% block beforehead %}<!-- before head  -->{% endblock %}
+     <script> //360收录
+ (function () {
+	var src = (document.location.protocol == "http:") ? "https://js.passport.qihucdn.com/11.0.1.js?d8e2efb86ed99f7bb30e3aac7bd80d97" : "https://jspassport.ssl.qhimg.com/11.0.1.js?d8e2efb86ed99f7bb30e3aac7bd80d97";
+	document.write('<script src="' + src + '" id="sozz"><\/script>');
+})();
+    </script>
     <script>
+//百度自动推送代码
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+    <script>
+
         // ES6 模板字符串
 //Vue.config.delimiters = ['${', '}']
 // 修改文本插值的定界符。
@@ -40,7 +66,7 @@
 <body>
     <nav class="uk-navbar uk-navbar-attached uk-margin-bottom">
         <div class="uk-container uk-container-center">
-            <a href="/" class="uk-navbar-brand">博客</a>
+            <a href="/" class="uk-navbar-brand">当当是个程序员</a>
             <ul class="uk-navbar-nav">
                 <li><a href="/"><i class="uk-icon-home"></i> 主页</a></li>
             </ul>
@@ -58,7 +84,32 @@
             </div>
         </div>
     </nav>
+    
+    <style type="text/css">
+#so360{white-space:nowrap;float:right;
+       margin-right:30px;margin-bottom:20px}
+#so360 form{margin:0;padding:0}
+#so360_keyword{width:307px;height:24px;line-height:24px;font:14px arial;padding:
+2px 5px;margin-right:5px;border:2px solid #6269B3;outline:0;vertical-align:middle}
 
+#so360_submit{width:70px;height:32px;border:0;color:#fff;
+ background:#6269B3;font-weight:bold;font:bold 14px arial;padding:0;
+ padding-top:3px\9;cursor:pointer;
+vertical-align:middle}
+</style>
+<div id="so360">
+    <form action="https://www.so.com/s" target="_blank" id="so360form">
+  <input type="text" autocomplete="off" name="q" id="so360_keyword" placeholder="站内搜索">
+        <input type="submit" id="so360_submit" value="搜 索">
+        <input type="hidden" name="ie" value="utf8">
+        <input type="hidden" name="src" value="zz_www.gongxinblog.net">
+        <input type="hidden" name="site" value="www.gongxinblog.net">
+        <input type="hidden" name="rg" value="1">
+    </form>
+</div>
+<div class="clear" style="
+    clear: right;
+"></div>
     <div class="uk-container uk-container-center">
         <div class="uk-grid">
             <!-- content -->
@@ -76,13 +127,14 @@
                     <a target="_blank" href="https://github.com/gong" class="uk-icon-button uk-icon-github"></a>
                 </p>
                 <p>Powered by <a href="#">Python</a>. Copyright &copy; 2017. {%if user and user.admin%}[<a href="/manage/blogs" target="_blank">管理</a>]{%endif%}</p>
-                <p><a href="http://www.xxxx.com/" target="_blank">www.xxxx.com</a>. All rights reserved.</p>
-                <a target="_blank" href="#"><i class="uk-icon-html5" style="font-size:64px; color: #444;"></i></a>
+                <p><a href="#">鄂ICP备17010875号</a>. All rights reserved.</p>
+                <i class="uk-icon-html5" style="font-size:64px; color: #2a76ec;"></i>
             </div>
         </div>
-      <video class="form__video" loop="" autoplay="" muted="">
+      <video class="form__video" loop="" autoplay="" muted="" >
     <source src="/static/images/iStock-628653202.mp4?t=1492599691853" type="video/mp4">
        </video>
     </div>
 </body>
+<script type="text/javascript" id="clustrmaps" src="//cdn.clustrmaps.com/map_v2.js?d=7_eEGdngE05V5-E-oif2gSeNaI4MYMXDjhVo-F8E8As&cl=ffffff&w=a"></script>
 </html>

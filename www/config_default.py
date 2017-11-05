@@ -4,7 +4,7 @@ configs = {
         'port': 3306,
         'user': 'root',
         'password': '1143178769',
-        'database': 'webapp'
+        'database': 'myblog'
     },
     'session': {
         'secret': 'AwEsOmE'

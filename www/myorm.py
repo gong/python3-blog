@@ -67,11 +67,14 @@ class Field(object):
         return '<%s, %s:%s>'%(self.__class__.__name__,self.column_type,self.name)
 
 class StringField(Field):#实现数据库中varchar类型到StringField的映射
-    def __init__(self,name=None,primary_key=False,default=None,ddl='varchar(100)'):
+    def __init__(self,name=None,primary_key=False,default=None,ddl='varchar(255)'):
         super().__init__(name,ddl,primary_key,default)
 
 class IntegerField(Field):#实现数据库中int类型到IntegerField的映射
     def __init__(self,name=None,primary_key=False,default=0,ddl='int'):
+        super().__init__(name,ddl,primary_key,default)
+class LongField(Field):
+    def __init__(self,name=None,primary_key=False,default=0,ddl='bigint'):
         super().__init__(name,ddl,primary_key,default)
 class FloatField(Field):
     def __init__(self,name=None,primary_key=False,default=0.0,ddl='real'):

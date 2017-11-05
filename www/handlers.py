@@ -9,7 +9,7 @@ import re,time
 from config import configs
 import logging
 import markdown
-
+#import pygments
 logging.basicConfig(level=logging.INFO)
 COOKIE_NAME = 'webappsession'
 _COOKIE_KEY = configs.session.secret
@@ -54,7 +54,7 @@ async def cookie2user(cookie_str):
 
 @get('/')
 async def index(*,request):#为了实现web server 必须创建request handler 它可能是函数也可能是协程
-    blogs = await Blog.findAll()
+    blogs = await Blog.findAll(orderBy="created_at DESC")
     i=0
     for blog in blogs:
         blogs[i].html_summary=markdown.markdown(blogs[i].summary,extensions=['extra', 'codehilite'])
@@ -67,17 +67,17 @@ async def index(*,request):#为了实现web server 必须创建request handler �
         return {
             '__template__': 'blogs.html',
             'blogs': blogs,
-            'user': request.__user__,
+       	    'user': request.__user__,
             'blogtags':blogtags,
-            'admin':admin
-        }
+       	    'admin':admin
+    	}
     else:
         return {
-            '__template__': 'blogs.html',
-            'blogs': blogs,
-            'user': request.__user__,
-            'blogtags':blogtags,
-            'admin':None
+            '__template__':'blogs.html',
+	    'blogs':blogs,
+            'user':request.__user__,
+	    'blogtags':blogtags,
+	    'admin':None	
         }
 @get('/tag/{id}')
 async def index2(*,id,request):
@@ -105,11 +105,13 @@ def api_comments(*, page='1'):
 @get('/blog/{id}')
 async def get_blog(*,t=1,id,request):#如果t这里要有默认值，那直接放在request前面会报错，因为带有默认值得参数需要放在位置参数的后面，但是request需要放在所有参数的后面，所以这里在前面加一个*号
     blog=await Blog.find(id)
+    blog.count+=1
+    await blog.update()
     logging.warning('看blog_id:%s',blog.content)
-    #blog.content=blog.content.replace('\n','<br>')
+   # blog.content=blog.content.replace('\n','<br>')
     logging.warning('看blog_id:%s', blog.content)
     blog.html_content=markdown.markdown(blog.content,extensions=['extra', 'codehilite'])
-    blog.html_content = blog.html_content.replace('\n', '<br>')
+    #blog.html_content = blog.html_content.replace('\n*', '<br>')
     #blog.html_content=blog.html_content.replace('&lt;br&gt;','<br>')
     #blog.html_content = blog.html_content.replace(' ', '&nbsp;')
     #blog.html_content = blog.html_content.replace('<code>', '<pre><code>')

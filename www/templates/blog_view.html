@@ -46,7 +46,7 @@ $(function () {
     <div class="uk-width-medium-3-4">
         <article class="uk-article">
             <h2>{{ blog.name }}</h2>
-            <p class="uk-article-meta">发表于{{ blog.created_at|datetime }}</p>
+            <p class="uk-article-meta">发表于{{ blog.created_at|datetime }} 阅读人数({{ blog.count }})</p>
             <p>{{ blog.html_content|safe }}</p>
         </article>
 
@@ -116,5 +116,46 @@ $(function () {
             </ul>
         </div>
     </div>
+
+<!-- JiaThis Button BEGIN 
+<div class="jiathis_style_24x24">
+	<a class="jiathis_button_qzone"></a>
+	<a class="jiathis_button_tsina"></a>
+	<a class="jiathis_button_tqq"></a>
+	<a class="jiathis_button_weixin"></a>
+	<a class="jiathis_button_renren"></a>
+	<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	<a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" src="http://v3.jiathis.com/code_mini/jia.js" charset="utf-8"></script>
+ JiaThis Button END -->
+<script> window._bd_share_config = {
+	"common": {
+		"bdSnsKey": {},
+		"bdText": "",
+		"bdMini": "2",
+		"bdMiniList": false,
+		"bdPic": "",
+		"bdStyle": "0",
+		"bdSize": "16"
+	},
+	"slide": {
+		"type": "slide",
+		"bdImg": "2",
+		"bdPos": "right",
+		"bdTop": "100"
+	},
+	"image": {
+		"viewList": ["qzone", "tsina", "tqq", "renren", "weixin"],
+		"viewText": "分享到：",
+		"viewSize": "16"
+	},
+	"selectShare": {
+		"bdContainerClass": null,
+		"bdSelectMiniList": ["qzone", "tsina", "tqq", "renren", "weixin"]
+	}
+};
+with (document)0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = '/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];
+</script>
 
 {% endblock %}

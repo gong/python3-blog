@@ -9,7 +9,7 @@
     <style type="text/css">
     .bd{margin: auto;
     position: relative;
-    background: rgba(238, 238, 238, 0.51);
+    background: rgba(216, 228, 238, 0.38);
     height: 662px;
     width: 955px;
     }
@@ -25,10 +25,11 @@
     .form{
      top:200px;
     margin: 0 auto;
-    background-color: rgba(158, 158, 158, 0.27);
+    background-color:#c1daed;
     position: relative;
     width: 197px;
     height: 170px;
+    overflow:hidden
     }
     .form input.un{
     margin-top:10px;
@@ -97,16 +98,21 @@ $(function () {
 <div class="login">
     <p style="text-align:center">登录</p>
 </div>
-<div class="form" >
+<div class="form">
 
-    <form id="vm" v-on="submit: submit">
+    <form id="vm" v-on="submit: submit" style="position:relative;z-index:2">
         <div class="uk-alert uk-alert-danger uk-hidden"></div>
     <input class="un" v-model="email" name="email" placeholder="Email" />
     <input class="pw" v-model="password" name="password" placeholder="Password" type="password"/>
      <input class="sb"  type="submit" value="登录" />
     </form>
+<video class="form__video" loop="" autoplay="" muted="" style="
+    
+">
+    <source src="/static/images/iStock-628653202.mp4?t=1492599691853" type="video/mp4">
+       </video>
 </div>
-    <div class="uk-width-medium-1-4">
+    <!--<div class="uk-width-medium-1-4">
         <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
@@ -116,7 +122,7 @@ $(function () {
                 <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="#">Git教程</a></li>
             </ul>
         </div>
-    </div>
+    </div>-->
 </div>
 
 {% endblock %}
